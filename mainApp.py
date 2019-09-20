@@ -19,13 +19,12 @@ def main(verbose = True):
         for arg in myargs:
             # Check if the user explicitly asked for verbosity
             if arg[0] == '-':
-                if arg.lower() == '-v':
+                if arg.lower() == '-v1':
                     verbose = True
-                elif arg.lower() == '-nv':
+                elif arg.lower() == '-v0':
                     verbose = False
                 elif arg.lower() == '-h':
-                    print('Help on the way...!')
-                    # print help!!
+                    display_help()
                 else:
                     print('Unrecognised flag passed, ignoring: {}'.format(arg))
         
@@ -65,8 +64,8 @@ def main(verbose = True):
     else:
         # Lack of arguments => exit...
         print('No conf files are given...')
-        print('No demo mode at the moment, exiting.')
-        # Consider showing help before exiting
+        print('No demo mode at the moment, see correct usage below.')
+        display_help()
 
     if actedon > 0:
         print('{} Task(s) were performed.'.format(actedon))
@@ -84,6 +83,12 @@ def welcome_message():
     print('              and visualisation.                 ')
     print('*************************************************')
     print('')
+
+def display_help():
+    print('SKIRONANALYSIS Application:')
+    print('Get basic statistics and figures for data in a SKIRON csv output file.')
+    print('Usage:')
+    print('skironanalysis batch.conf [batch2.conf ...] [-v0, -v1, -h]')
 
 ###############################################################
 # Actual run part

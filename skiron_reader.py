@@ -6,8 +6,9 @@ for the csv files provided by SKIRON.
 import numpy as np
 import csv
 import os
-from task_reader import Task, VEC, SCAL, FILE, HISTO, SCATT, ROSE, HEAT, STATS, SAVE, FTYPE, METEO
-from support_data import DIR, MAG, MEAN, MIN, MAX, MEDIAN, STD, PRCTILES, COV, ptiles, STAT_ID
+from task_reader import Task, VEC, SCAL, FILE, HISTO, SCATT, ROSE, HEAT, STATS, SERIES, SAVE, FTYPE, METEO
+from support_data import DIR, MAG, MEAN, MIN, MAX, MEDIAN, STD, PRCTILES, COV, RECORDS, ptiles, STAT_ID
+import skiron_fig_lib as sflib
 
 def get_mag_dir(x, y, origin = False):
     """
@@ -171,6 +172,7 @@ class SkironData:
                 self.stats[item][MIN] = np.min(self.data[item]) 
                 self.stats[item][MEDIAN] = np.median(self.data[item]) 
                 self.stats[item][STD] = np.std(self.data[item])
+                self.stats[item][RECORDS] = self.validRecords
                 self.stats[item][PRCTILES] = []
                 for pp in ptiles:
                     self.stats[item][PRCTILES].append(np.percentile(self.data[item], pp))
@@ -185,11 +187,13 @@ class SkironData:
                     self.stats[item2][MIN] = np.min(self.data[item1][item2]) 
                     self.stats[item2][MEDIAN] = np.median(self.data[item1][item2]) 
                     self.stats[item2][STD] = np.std(self.data[item1][item2])
+                    self.stats[item2][RECORDS] = self.validRecords
                     self.stats[item2][PRCTILES] = []
                     for pp in ptiles:
                         self.stats[item2][PRCTILES].append(np.percentile(self.data[item1][item2], pp))
             
                 self.stats[item1] = {}
+                self.stats[item1][RECORDS] = self.validRecords
                 self.stats[item1][COV] = np.cov(self.data[item1][item1[0]], self.data[item1][item1[1]])
 
         # Save the statistics in file
@@ -254,8 +258,7 @@ class SkironData:
 
                         f.write('{};'.format(val))
                     f.write('\n')
-
-
+        return
 
     def create_plots(self):
         """
@@ -278,6 +281,10 @@ class SkironData:
         if self.task.opt_dict[ROSE]:
             # Create rose diagrams
             self.plot_rose()
+        
+        if self.task.opt_dict[SERIES]:
+            # Create timeseries graph
+            self.plot_timeseries()
 
         print('Exiting figure creator controller.')
         return True
@@ -293,7 +300,9 @@ class SkironData:
                 for figtype in self.task.opt_dict[FTYPE]:
                     fileName.append(os.path.join(self.task.opt_dict[SAVE], 'scatter_{}_{}.{}'.format(item[0], item[1], figtype)))
 
-                #print(fileName)
+                mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, SCATT)
+                sflib.plot_scatter(fileName, self.data[item][item[0]], self.data[item][item[1]], title = mtitle, xlabel = mxlabel, ylabel = mylabel, dpi = 150, marker = '.', markSize = 0.6, figsize = (10,10))
+                
         return 0
 
     def plot_histo(self):
@@ -307,7 +316,20 @@ class SkironData:
                     for figtype in self.task.opt_dict[FTYPE]:
                         fileName.append(os.path.join(self.task.opt_dict[SAVE], 'histogram_{}.{}'.format(sub, figtype)))
 
-                    #print(fileName)
+                    mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(sub, HISTO)
+                    sflib.plot_histogram(fileName, self.data[item][sub], bins = 10, title = mtitle, xlabel = mxlabel, ylabel = mylabel, dpi = 150, figsize = (10,10))
+                
+                fileName_mag = []
+                fileName_dir = []
+                for figtype in self.task.opt_dict[FTYPE]:
+                    fileName_mag.append(os.path.join(self.task.opt_dict[SAVE], 'histogram_{}_{}_mag.{}'.format(item[0], item[1], figtype))) 
+                    fileName_dir.append(os.path.join(self.task.opt_dict[SAVE], 'histogram_{}_{}_dir.{}'.format(item[0], item[1], figtype)))
+
+                mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, HISTO, special = MAG)
+                sflib.plot_histogram(fileName_mag, self.data[item][MAG], bins = 10, title = mtitle, xlabel = mxlabel, ylabel = mylabel, dpi = 150, figsize = (10,10))
+
+                mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, HISTO, special = DIR)
+                sflib.plot_histogram(fileName_dir, self.data[item][DIR], bins = 10, title = mtitle, xlabel = mxlabel, ylabel = mylabel, dpi = 150, figsize = (10,10))
 
         if self.scalHeads:
             for item in self.scalHeads:
@@ -315,7 +337,9 @@ class SkironData:
                 for figtype in self.task.opt_dict[FTYPE]:
                     fileName.append(os.path.join(self.task.opt_dict[SAVE], 'histogram_{}.{}'.format(item, figtype)))
 
-                #print(fileName)
+                mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, HISTO)
+                sflib.plot_histogram(fileName, self.data[item], bins = 10, title = mtitle, xlabel = mxlabel, ylabel = mylabel, dpi = 150, figsize = (10,10))
+                
         return 0
 
     def plot_heat(self):
@@ -328,6 +352,7 @@ class SkironData:
                 for figtype in self.task.opt_dict[FTYPE]:
                     fileName.append(os.path.join(self.task.opt_dict[SAVE], 'heatmap_{}_{}.{}'.format(item[0], item[1], figtype)))
 
+                mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, HEAT)
                 #print(fileName)
         return 0
 
@@ -341,6 +366,44 @@ class SkironData:
                 for figtype in self.task.opt_dict[FTYPE]:
                     fileName.append(os.path.join(self.task.opt_dict[SAVE], 'rose_{}_{}.{}'.format(item[0], item[1], figtype)))
 
+                mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, ROSE)
+                #print(fileName)
+        return 0
+    
+    def plot_timeseries(self):
+        """
+        Responsible for visualising timeseries of data.
+        """
+        if self.vecHeads:
+            for item in self.vecHeads:
+                for sub in item:
+                    fileName = []
+                    for figtype in self.task.opt_dict[FTYPE]:
+                        fileName.append(os.path.join(self.task.opt_dict[SAVE], 'timeseries_{}.{}'.format(sub, figtype)))
+
+                    mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(sub, SERIES)
+                    sflib.plot_timeseries(fileName, self.data[item][sub], title = mtitle, xlabel = mxlabel, ylabel = mylabel, dpi = 150, figsize = (10,10))
+                
+                fileName_mag = []
+                fileName_dir = []
+                for figtype in self.task.opt_dict[FTYPE]:
+                    fileName_mag.append(os.path.join(self.task.opt_dict[SAVE], 'timeseries_{}_{}_mag.{}'.format(item[0], item[1], figtype))) 
+                    fileName_dir.append(os.path.join(self.task.opt_dict[SAVE], 'timeseries_{}_{}_dir.{}'.format(item[0], item[1], figtype)))
+
+                mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, SERIES, special = MAG)
+                sflib.plot_timeseries(fileName_mag, self.data[item][MAG], title = mtitle, xlabel = mxlabel, ylabel = mylabel, dpi = 150, figsize = (10,10))
+
+                mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, SERIES, special = DIR)
+                sflib.plot_timeseries(fileName_dir, self.data[item][DIR], title = mtitle, xlabel = mxlabel, ylabel = mylabel, dpi = 150, figsize = (10,10))
+
+        if self.scalHeads:
+            for item in self.scalHeads:
+                fileName = []
+                for figtype in self.task.opt_dict[FTYPE]:
+                    fileName.append(os.path.join(self.task.opt_dict[SAVE], 'timeseries_{}.{}'.format(item, figtype)))
+
+                mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, SERIES)
+                sflib.plot_timeseries(fileName, self.data[item], title = mtitle, xlabel = mxlabel, ylabel = mylabel, dpi = 150, figsize = (10,10))
                 #print(fileName)
         return 0
         

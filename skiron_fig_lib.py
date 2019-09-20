@@ -2,6 +2,7 @@ from windrose import WindroseAxes
 from matplotlib import pyplot as plt
 import matplotlib.ticker as tkr
 import numpy as np
+from support_data import description_dict, units_dict, level_dict, graph_types, SCATT, HISTO, ROSE, HEAT, SERIES, MAG, DIR
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def plot_scatter(filename, xdata, ydata, title = None, xlabel = None, ylabel = None, dpi = 150, marker = '.', markSize = 0.6, figsize = (10,10)):
@@ -19,7 +20,7 @@ def plot_scatter(filename, xdata, ydata, title = None, xlabel = None, ylabel = N
         plt.ylabel(ylabel)
     plt.axis('square')
     
-    if filename is list:
+    if isinstance(filename, list):
         for item in filename:
             fig.savefig(item, dpi = dpi)
     else:
@@ -41,7 +42,7 @@ def plot_histogram(filename, mydata, bins = 10, title = None, xlabel = None, yla
     if ylabel:
         plt.ylabel(ylabel)
 
-    if filename is list:
+    if isinstance(filename, list):
         for item in filename:
             fig.savefig(item, dpi = dpi)
     else:
@@ -50,7 +51,29 @@ def plot_histogram(filename, mydata, bins = 10, title = None, xlabel = None, yla
     return 0
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def get_heatmap(filename, xdata, ydata, binx, biny, title = None, xlabel = None, ylabel = None, dpi = 150, figsize = (10,10)):
+def plot_timeseries(filename, mydata, title = None, xlabel = None, ylabel = None, dpi = 150, figsize = (10,10)):
+    """
+    Plots the timeseries.
+    """
+    fig = plt.figure(figsize = figsize)
+    plt.plot(mydata)
+    if title:
+        plt.title(title)
+    if xlabel:
+        plt.xlabel(xlabel)
+    if ylabel:
+        plt.ylabel(ylabel)
+
+    if isinstance(filename, list):
+        for item in filename:
+            fig.savefig(item, dpi = dpi)
+    else:
+        fig.savefig(filename, dpi = dpi)
+    plt.close()
+    return 0
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+def plot_heatmap(filename, xdata, ydata, binx, biny, title = None, xlabel = None, ylabel = None, dpi = 150, figsize = (10,10)):
     """
     Present variables as a 2D heatmap
     to correlate magnitude and direction.
@@ -109,7 +132,7 @@ def get_heatmap(filename, xdata, ydata, binx, biny, title = None, xlabel = None,
             text = ax.text(i, j, int(100.0*table2d[j, i]/total), ha="center", va="center", color="w")
     fig.tight_layout()
     
-    if filename is list:
+    if isinstance(filename, list):
         for item in filename:
             fig.savefig(item, dpi = dpi)
     else:
@@ -144,10 +167,97 @@ def plot_roses(filename, vdir, mag, nsector = 16, bins = 10, title = None, legti
     ax.set_yticks(np.arange(0, tictic[-1], tictic[-1]/len(tictic)))
     ax.yaxis.set_major_formatter(tkr.FormatStrFormatter('%2.0f'))
 
-    if filename is list:
+    if isinstance(filename, list):
         for item in filename:
             fig.savefig(item, dpi = dpi)
     else:
         fig.savefig(filename, dpi = dpi)
     plt.close()
     return 0
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+def get_fig_decorations_from_header(header, figtype, special = None):
+    """
+    Analyses the content of the header
+    and produces various strings to be 
+    used as a part of title, x and y 
+    labels and the legend in figures.
+    """
+    title = '{} of '.format(graph_types.get(figtype, 'Unknown fig. type'))
+    if isinstance(header, tuple):
+        title += 'Wind '
+
+        partOne = header[0]
+        partTwo = header[1]
+        parts = partOne.split('_')
+        parts2 = partTwo.split('_')
+
+        title += '@ {}'.format(level_dict.get(parts[1].lower(), 'some level'))
+
+        if figtype == HISTO:
+            if special:
+                xlabel = '{} ({})'.format(description_dict.get(special, 'unknown var'), units_dict.get(special, 'units'))
+            else:
+                xlabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
+            ylabel = 'Absolute frequency (#)'
+            legend = 'Legend'
+        elif figtype == SERIES:
+            xlabel = 'records (#)'
+            if special:
+                ylabel = '{} ({})'.format(description_dict.get(special, 'unknown var'), units_dict.get(special, 'units'))
+            else:
+                ylabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
+            legend = 'Legend'
+        elif figtype == SCATT:
+            xlabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
+            ylabel = '{} ({})'.format(description_dict.get(parts2[0].lower(), 'unknown var'), units_dict.get(parts2[0].lower(), 'units'))
+            legend = 'Legend'
+        elif figtype == HEAT:
+            xlabel = ''
+            ylabel = ''
+            legend = ''
+        elif figtype == ROSE:
+            xlabel = ''
+            ylabel = ''
+            legend = ''
+        else:
+            print('figtype {} not recognised'.format(figtype))
+            xlabel = 'xlabel'
+            ylabel = 'ylabel'
+            legend = 'Legend'
+
+    else:
+        parts = header.split('_')
+        title += '{} @ {}'.format(description_dict.get(parts[0].lower(), 'Unknown variable'), level_dict.get(parts[1].lower(), 'some level'))
+        
+        if figtype == HISTO:
+            xlabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
+            ylabel = 'Absolute frequency (#)'
+            legend = 'Legend'
+        elif figtype == SERIES:
+            xlabel = 'records (#)'
+            ylabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
+            legend = 'Legend'
+        else:
+            print('figtype {} not recognised'.format(figtype))
+            xlabel = 'xlabel'
+            ylabel = 'ylabel'
+            legend = 'Legend'
+
+
+
+    
+    # if type2:
+    #     core = header[1:-1]
+    #     partOne = core.split(',')[0]
+    #     parts = partOne.split('_')
+
+    #     title = 'Wind @ {}'.format(level_dict.get(parts[1].lower(), 'some level'))
+    #     alabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
+    # else:
+    #     parts = header.split('_')
+
+    #     title = '{} @ {}'.format(description_dict.get(parts[0].lower(), 'Unknown variable'), level_dict.get(parts[1].lower(), 'some level'))
+    #     alabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
+
+    return title, xlabel, ylabel, legend

@@ -7,7 +7,7 @@ is asked from the application.
 """
 import os
 import ntpath
-from support_data import FILE, NODATA, VEC, SCAL, HISTO, SCATT, ROSE, HEAT, STATS, SAVE, FTYPE, METEO, NOKEY, KEYS, INIT_DICT, DEF_VALS, POS_ANS, FTYPES_ALLOWED
+from support_data import FILE, NODATA, VEC, SCAL, HISTO, SCATT, ROSE, HEAT, STATS, SERIES, SAVE, FTYPE, METEO, NOKEY, KEYS, INIT_DICT, DEF_VALS, POS_ANS, FTYPES_ALLOWED
 
 def path_leaf(path):
     """
@@ -265,6 +265,10 @@ class Task:
         if self.opt_dict[ROSE]:
             outcount += 1
         if self.opt_dict[HEAT]:
+            outcount += 1
+        if self.opt_dict[SERIES]:
+            outcount += 1
+        if self.opt_dict[STATS]:
             outcount += 1
         if not outcount:
             print('No output is actually requested!')
