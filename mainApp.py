@@ -101,6 +101,7 @@ def display_help():
 ###############################################################
 # Actual run part
 if __name__ == "__main__":
+    print('\n\n')
     main()
 
 
