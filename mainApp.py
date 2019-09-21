@@ -25,6 +25,13 @@ def main(verbose = True):
                     verbose = False
                 elif arg.lower() == '-h':
                     display_help()
+                    if nargs > 1:
+                        print('')
+                        print('Execution terminated after showing help.')
+                        print('If processing is needed, please remove "-h" flag and retry.')
+                        print('Exiting...')
+                        print('-------------------------------------------------------------')
+                    return
                 else:
                     print('Unrecognised flag passed, ignoring: {}'.format(arg))
         
@@ -75,6 +82,7 @@ def main(verbose = True):
     print('Inspect previous messages for any errors/tasks undone...')
     print('End')
     print('-------------------------------------------------------------')
+    return
 
 def welcome_message():
     print('')

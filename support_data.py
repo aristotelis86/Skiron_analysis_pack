@@ -20,23 +20,33 @@ RECORDS = 'records'
 ptiles = [10, 20, 40, 60, 80, 90]
 STAT_ID = [MEAN, MIN, MAX, MEDIAN, STD, COV, PRCTILES, RECORDS]
 
-# Variables to be used primarily
-# by the Task reader.
-FILE = 'file'
-NODATA = 'nodata'
-VEC = 'vec'
-SCAL = 'scal'
-HISTO = 'histo'
-SCATT = 'scatter'
-ROSE = 'rose'
-HEAT = 'heat'
-STATS = 'stats'
-SERIES = 'series'
-SAVE = 'save'
-FTYPE = 'ftype'
-METEO = 'meteo'
-NOKEY = 'nokey'
+# Variables to be used primarily by the Task reader.
+# (Gather depending on the type of input expected.)
+FILE = 'file'           # string - path
+SAVE = 'save'           # string - path
 
+NODATA = 'nodata'       # string or comma-separated strings (might not be used, will use try-except functionality...)
+VEC = 'vec'             # string or comma-separated strings
+SCAL = 'scal'           # string
+FTYPE = 'ftype'         # string or comma-separated strings
+
+HISTO = 'histo'         # logical
+SCATT = 'scatter'       # logical
+ROSE = 'rose'           # logical
+HEAT = 'heat'           # logical
+STATS = 'stats'         # logical
+SERIES = 'series'       # logical
+METEO = 'meteo'         # logical
+
+DPI = 'dpi'             # numeric (int)
+FIGSIZE = 'figsize'     # numeric (float), one or two values
+TFONT = 'titlefont'     # numeric (int)
+LFONT = 'labelfont'     # numeric (int)
+
+NOKEY = 'nokey'         # Not expected in the conf file, just as a no-key flag for the rest of the code
+NOKEY_val = ''
+
+# List the keys above
 KEYS = [
     FILE,
     NODATA,
@@ -54,41 +64,40 @@ KEYS = [
     NOKEY
 ]
 
-INIT_DICT = {
+KEYS_str = {
     FILE: '',
-    NODATA: [],
-    VEC: [],
-    SCAL: [],
-    HISTO: False,
-    SCATT: False,
-    ROSE: False,
-    HEAT: False,
-    STATS: False,
-    SERIES: False,
-    SAVE: '',
-    FTYPE: [],
-    METEO: True
+    SAVE: ''
 }
 
-DEF_VALS = {
-    FILE: '',
+KEYS_mult_str = {
     NODATA: ['null'],
     VEC: [],
     SCAL: [],
+    FTYPE: ['png']
+}
+
+KEYS_bool = {
     HISTO: False,
     SCATT: False,
     ROSE: False,
     HEAT: False,
     STATS: False,
     SERIES: False,
-    SAVE: 'results',
-    FTYPE: ['png'],
-    METEO: True,
-    NOKEY: ''
+    METEO: True             # Gotcha! On by default, meteorological convention for directions
+}
+
+KEYS_num = {
+    DPI: 150,
+    TFONT: 17,
+    LFONT: 14
+}
+
+KEYS_mult_num = {
+    FIGSIZE: (10, 10)
 }
 
 POS_ANS = ['1', 't', 'y', 'yes', 'true']
-FTYPES_ALLOWED = ['png', 'jpg', 'jpeg']
+FTYPES_ALLOWED = ['png', 'eps', 'pdf', 'ps', 'svg']
 
 # This section defines the dictionaries
 # to help when annotating the figures.

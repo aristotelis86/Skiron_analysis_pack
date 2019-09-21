@@ -5,7 +5,7 @@ import numpy as np
 from support_data import description_dict, units_dict, level_dict, graph_types, SCATT, HISTO, ROSE, HEAT, SERIES, MAG, DIR
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def plot_scatter(filename, xdata, ydata, title = None, xlabel = None, ylabel = None, dpi = 150, marker = '.', markSize = 0.6, figsize = (10,10)):
+def plot_scatter(filename, xdata, ydata, title = None, xlabel = None, ylabel = None, dpi = 150, marker = '.', markSize = 0.6, figsize = (10,10), tfont = 17, lfont = 14):
     """
     Plots scatter graph for x- and y-components
     of the required field.
@@ -13,12 +13,18 @@ def plot_scatter(filename, xdata, ydata, title = None, xlabel = None, ylabel = N
     fig = plt.figure(figsize = figsize)
     plt.plot(xdata, ydata, marker, Markersize = markSize)
     if title:
-        plt.title(title)
+        plt.title(title, fontsize = tfont)
     if xlabel:
-        plt.xlabel(xlabel)
+        plt.xlabel(xlabel, fontsize = lfont)
     if ylabel:
-        plt.ylabel(ylabel)
+        plt.ylabel(ylabel, fontsize = lfont)
     plt.axis('square')
+
+    cfont = max([8, lfont-2])
+    plt.xticks(fontsize = cfont)
+    plt.yticks(fontsize = cfont)
+
+    plt.grid()
     
     if isinstance(filename, list):
         for item in filename:
@@ -29,18 +35,22 @@ def plot_scatter(filename, xdata, ydata, title = None, xlabel = None, ylabel = N
     return 0
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def plot_histogram(filename, mydata, bins = 10, title = None, xlabel = None, ylabel = None, dpi = 150, figsize = (10,10)):
+def plot_histogram(filename, mydata, bins = 10, title = None, xlabel = None, ylabel = None, dpi = 150, figsize = (10,10), tfont = 17, lfont = 14):
     """
     Plots a histogram for scalar timeseries.
     """
     fig = plt.figure(figsize = figsize)
     plt.hist(mydata, bins = bins)
     if title:
-        plt.title(title)
+        plt.title(title, fontsize = tfont)
     if xlabel:
-        plt.xlabel(xlabel)
+        plt.xlabel(xlabel, fontsize = lfont)
     if ylabel:
-        plt.ylabel(ylabel)
+        plt.ylabel(ylabel, fontsize = lfont)
+    
+    cfont = max([8, lfont-2])
+    plt.xticks(fontsize = cfont)
+    plt.yticks(fontsize = cfont)
 
     if isinstance(filename, list):
         for item in filename:
@@ -51,18 +61,24 @@ def plot_histogram(filename, mydata, bins = 10, title = None, xlabel = None, yla
     return 0
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def plot_timeseries(filename, mydata, title = None, xlabel = None, ylabel = None, dpi = 150, figsize = (10,10)):
+def plot_timeseries(filename, mydata, title = None, xlabel = None, ylabel = None, dpi = 150, figsize = (10,10), tfont = 17, lfont = 14):
     """
     Plots the timeseries.
     """
     fig = plt.figure(figsize = figsize)
     plt.plot(mydata)
     if title:
-        plt.title(title)
+        plt.title(title, fontsize = tfont)
     if xlabel:
-        plt.xlabel(xlabel)
+        plt.xlabel(xlabel, fontsize = lfont)
     if ylabel:
-        plt.ylabel(ylabel)
+        plt.ylabel(ylabel, fontsize = lfont)
+    
+    cfont = max([8, lfont-2])
+    plt.xticks(fontsize = cfont)
+    plt.yticks(fontsize = cfont)
+    
+    plt.grid()
 
     if isinstance(filename, list):
         for item in filename:
@@ -73,7 +89,7 @@ def plot_timeseries(filename, mydata, title = None, xlabel = None, ylabel = None
     return 0
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def plot_heatmap(filename, xdata, ydata, binx, biny, title = None, xlabel = None, ylabel = None, dpi = 150, figsize = (10,10)):
+def plot_heatmap(filename, xdata, ydata, binx, biny, title = None, xlabel = None, ylabel = None, dpi = 150, figsize = (10,10), tfont = 17, lfont = 14):
     """
     Present variables as a 2D heatmap
     to correlate magnitude and direction.
@@ -84,6 +100,9 @@ def plot_heatmap(filename, xdata, ydata, binx, biny, title = None, xlabel = None
                 return ibin + 1
         return 0
     total = len(xdata)
+    if total == 0:
+        print('Not enough data to produce heatmap, exiting...')
+        return 
     nx, nxbins = np.histogram(xdata, bins = binx)
     ny, nybins = np.histogram(ydata, bins = biny)
 
@@ -94,18 +113,18 @@ def plot_heatmap(filename, xdata, ydata, binx, biny, title = None, xlabel = None
         temp_x[ij] = get_bin_id(nxbins, xdata[ij])
         temp_y[ij] = get_bin_id(nybins, ydata[ij])
 
-    table2d = np.zeros((len(nxbins)-1,len(nybins)-1))
+    table2d = np.zeros((len(nybins)-1,len(nxbins)-1))
 
     for ij in range(len(temp_x)):
-        table2d[int(temp_x[ij])-1, int(temp_y[ij])-1] += 1
+        table2d[int(temp_y[ij])-1, int(temp_x[ij])-1] += 1
 
     x_labels = []
     y_labels = []
     for ij in range(len(nxbins)-1):
-        x_labels.append('{:.1f}'.format(0.5*(nxbins[ij] + nxbins[ij+1])))
+        x_labels.append('{:.2f}'.format(0.5*(nxbins[ij] + nxbins[ij+1])))
     
     for ij in range(len(nybins)-1):
-        y_labels.append('{:.2f}'.format(0.5*(nxbins[ij] + nxbins[ij+1])))
+        y_labels.append('{:.1f}'.format(0.5*(nybins[ij] + nybins[ij+1])))
 
     fig, ax = plt.subplots()
     fig.set_size_inches(figsize[0], figsize[1])
@@ -118,12 +137,19 @@ def plot_heatmap(filename, xdata, ydata, binx, biny, title = None, xlabel = None
     ax.set_xticklabels(x_labels)
     ax.set_yticklabels(y_labels)
     if title:
-        ax.set_title(title)
+        ax.set_title(title, fontsize = tfont)
     if ylabel:
-        ax.set_ylabel(ylabel)
+        ax.set_ylabel(ylabel, fontsize = lfont)
     if xlabel:
-        ax.set_xlabel(xlabel)
+        ax.set_xlabel(xlabel, fontsize = lfont)
 
+    ylims = ax.get_yticks()
+    rr = ylims[1] - ylims[0]
+    ax.set_ylim(ylims[0] - rr/2., ylims[-1] + rr/2.)
+
+    cfont = max([8, lfont-2])
+    ax.tick_params(axis = 'both', which = 'major', labelsize = cfont)
+    
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
@@ -141,7 +167,7 @@ def plot_heatmap(filename, xdata, ydata, binx, biny, title = None, xlabel = None
     return 0
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def plot_roses(filename, vdir, mag, nsector = 16, bins = 10, title = None, legtitle = None, dpi = 150, figsize = (10,10)):
+def plot_roses(filename, vdir, mag, nsector = 16, bins = 10, title = None, legtitle = None, dpi = 150, figsize = (10,10), tfont = 17, lfont = 14):
     """
     Plots the rose chart 
     from wind data and
@@ -157,7 +183,10 @@ def plot_roses(filename, vdir, mag, nsector = 16, bins = 10, title = None, legti
     # ax.bar(wind['dir'], wind['sp'], normed=True, opening=0.9, edgecolor='white', bins=np.linspace(0,max(wind['sp']), 10), nsector=16)
     ax.bar(vdir, mag, normed = True, opening = 0.9, edgecolor = 'white', bins = bins, nsector = nsector)
     if title:
-        ax.set_title("{}".format(title), position = (0.5, 1.1))
+        ax.set_title("{}".format(title), position = (0.5, 1.1), fontsize = tfont)
+    
+    cfont = max([8, lfont-2])
+    ax.tick_params(axis = 'both', which = 'major', labelsize = cfont)
 
     ax.set_legend()
     if legtitle:
@@ -213,13 +242,17 @@ def get_fig_decorations_from_header(header, figtype, special = None):
             ylabel = '{} ({})'.format(description_dict.get(parts2[0].lower(), 'unknown var'), units_dict.get(parts2[0].lower(), 'units'))
             legend = 'Legend'
         elif figtype == HEAT:
-            xlabel = ''
-            ylabel = ''
-            legend = ''
+            if special:
+                xlabel = '{} ({})'.format(description_dict.get(MAG, 'unknown var'), units_dict.get(MAG, 'units'))
+                ylabel = '{} ({})'.format(description_dict.get(DIR, 'unknown var'), units_dict.get(DIR, 'units'))
+            else:
+                xlabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
+                ylabel = '{} ({})'.format(description_dict.get(parts2[0].lower(), 'unknown var'), units_dict.get(parts2[0].lower(), 'units'))
+            legend = 'Legend'
         elif figtype == ROSE:
-            xlabel = ''
-            ylabel = ''
-            legend = ''
+            xlabel = 'xlabel'
+            ylabel = 'ylabel'
+            legend = '{} ({})'.format(description_dict.get(MAG, 'unknown var'), units_dict.get(MAG, 'units'))
         else:
             print('figtype {} not recognised'.format(figtype))
             xlabel = 'xlabel'
@@ -228,7 +261,10 @@ def get_fig_decorations_from_header(header, figtype, special = None):
 
     else:
         parts = header.split('_')
-        title += '{} @ {}'.format(description_dict.get(parts[0].lower(), 'Unknown variable'), level_dict.get(parts[1].lower(), 'some level'))
+        if len(parts) > 1:
+            title += '{} @ {}'.format(description_dict.get(parts[0].lower(), 'Unknown variable'), level_dict.get(parts[1].lower(), 'some level'))
+        else:
+            title += '{} @ {}'.format(description_dict.get(parts[0].lower(), 'Unknown variable'), 'some level')
         
         if figtype == HISTO:
             xlabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
@@ -243,21 +279,5 @@ def get_fig_decorations_from_header(header, figtype, special = None):
             xlabel = 'xlabel'
             ylabel = 'ylabel'
             legend = 'Legend'
-
-
-
-    
-    # if type2:
-    #     core = header[1:-1]
-    #     partOne = core.split(',')[0]
-    #     parts = partOne.split('_')
-
-    #     title = 'Wind @ {}'.format(level_dict.get(parts[1].lower(), 'some level'))
-    #     alabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
-    # else:
-    #     parts = header.split('_')
-
-    #     title = '{} @ {}'.format(description_dict.get(parts[0].lower(), 'Unknown variable'), level_dict.get(parts[1].lower(), 'some level'))
-    #     alabel = '{} ({})'.format(description_dict.get(parts[0].lower(), 'unknown var'), units_dict.get(parts[0].lower(), 'units'))
 
     return title, xlabel, ylabel, legend
