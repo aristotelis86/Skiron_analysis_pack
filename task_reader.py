@@ -128,6 +128,7 @@ class Task:
 
         # Get the full path and name of the file in one string
         fullname = os.path.abspath(filename) 
+        print('For task: {}'.format(fullname))
 
         # Check if the conf file exists
         if not os.path.exists(fullname):
@@ -187,6 +188,7 @@ class Task:
         Just for debugging.
         Printing the dictionary.
         """
+        print('')
         print('--------------------------------------------')
         print('                Task Summary                ')
         print('--------------------------------------------')

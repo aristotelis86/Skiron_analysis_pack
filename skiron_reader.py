@@ -58,6 +58,8 @@ class SkironData:
             print('Filename is not given...')
             print('Exiting Skiron data reader... <------')
             return
+
+        print('For task "{}" processing {}...'.format(self.task.fname, self.fname))
         
         if (not self.vecHeads) and (not self.scalHeads):
             print('No headers to look for...')
@@ -78,6 +80,7 @@ class SkironData:
         """
         For development - produce a summary of contents.
         """
+        print('')
         print('--------------------------------------------')
         print('                Data Summary                ')
         print('--------------------------------------------')
