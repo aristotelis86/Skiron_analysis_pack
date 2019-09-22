@@ -13,6 +13,7 @@ def main(verbose = True):
     myargs = sys.argv[1:]
     nargs = len(myargs)
     actedon = 0
+    dry = False
 
     # If we do have arguments...
     if nargs > 0:
@@ -23,6 +24,8 @@ def main(verbose = True):
                     verbose = True
                 elif arg.lower() == '-v0':
                     verbose = False
+                elif arg.lower() == '-dry':
+                    dry = True
                 elif arg.lower() == '-h':
                     display_help()
                     if nargs > 1:
@@ -46,8 +49,13 @@ def main(verbose = True):
                     print('Task was not read correctly --> {}'.format(arg))
                     print('Continue with any remaining tasks...')
                     continue
-                if verbose:
+                if verbose or dry:
                     temp_task.dump()
+
+                if dry:
+                    print('Finished dry run.')
+                    print('No action taken.')
+                    return
                 
                 temp_skiron = SkironData(temp_task)
                 if not temp_skiron.ok:
@@ -80,8 +88,6 @@ def main(verbose = True):
         print('No action taken.')
 
     print('Inspect previous messages for any errors/tasks undone...')
-    print('End')
-    print('-------------------------------------------------------------')
     return
 
 def welcome_message():
@@ -96,13 +102,15 @@ def display_help():
     print('SKIRONANALYSIS Application:')
     print('Get basic statistics and figures for data in a SKIRON csv output file.')
     print('Usage:')
-    print('skironanalysis batch.conf [batch2.conf ...] [-v0, -v1, -h]')
+    print('skironanalysis batch.conf [batch2.conf ...] [-v0, -v1, -h, -dry]')
 
 ###############################################################
 # Actual run part
 if __name__ == "__main__":
     print('\n\n')
     main()
+    print('End')
+    print('-------------------------------------------------------------')
 
 
 

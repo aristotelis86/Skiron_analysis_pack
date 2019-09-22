@@ -24,6 +24,9 @@ STAT_ID = [MEAN, MIN, MAX, MEDIAN, STD, COV, PRCTILES, RECORDS]
 # (Gather depending on the type of input expected.)
 FILE = 'file'           # string - path
 SAVE = 'save'           # string - path
+DATETIME = 'datetime'   # string to inform engine for the header of date-time data
+TIMEFROM = 'timefrom'   # string to limit data porcessing based on time
+TIMETO = 'timeto'       # string to limit data porcessing based on time
 
 NODATA = 'nodata'       # string or comma-separated strings (might not be used, will use try-except functionality...)
 VEC = 'vec'             # string or comma-separated strings
@@ -47,26 +50,12 @@ NOKEY = 'nokey'         # Not expected in the conf file, just as a no-key flag f
 NOKEY_val = ''
 
 # List the keys above
-KEYS = [
-    FILE,
-    NODATA,
-    VEC,
-    SCAL,
-    HISTO,
-    SCATT,
-    ROSE,
-    HEAT,
-    STATS,
-    SERIES,
-    SAVE,
-    FTYPE,
-    METEO,
-    NOKEY
-]
-
 KEYS_str = {
     FILE: '',
-    SAVE: ''
+    SAVE: '',
+    DATETIME: 'datetime',
+    TIMEFROM: '',
+    TIMETO: ''
 }
 
 KEYS_mult_str = {

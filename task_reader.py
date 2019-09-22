@@ -7,7 +7,8 @@ is asked from the application.
 """
 import os
 import ntpath
-from support_data import FILE, NODATA, VEC, SCAL, HISTO, SCATT, ROSE, HEAT, STATS, SERIES, SAVE, FTYPE, METEO, DPI, FIGSIZE, POS_ANS, FTYPES_ALLOWED
+from dateutil.parser import parse
+from support_data import FILE, NODATA, VEC, SCAL, HISTO, SCATT, ROSE, HEAT, STATS, SERIES, SAVE, FTYPE, METEO, DPI, FIGSIZE, DATETIME, TIMEFROM, TIMETO, POS_ANS, FTYPES_ALLOWED
 from support_data import KEYS_bool, KEYS_mult_num, KEYS_mult_str, KEYS_num, KEYS_str, NOKEY, NOKEY_val
 
 def path_leaf(path):
@@ -301,7 +302,7 @@ class Task:
                 self.opt_dict[SCAL].append(item1)
                 scount += 1
             else:
-                print('Removing {}'.format(item))
+                print('Removing {} because it is not in csv headers.'.format(item))
         
         vcount = 0
         temp_list = self.opt_dict[VEC]
@@ -328,6 +329,8 @@ class Task:
                         temp_tup.append(current)
                         last = current
                         cc += 1
+                    else:
+                        print('Removing {} because it is not in csv headers.'.format(current))
 
                 if cc == 2:
                     self.opt_dict[VEC].append(tuple(temp_tup))
@@ -402,7 +405,18 @@ class Task:
             print('Unknown format for figsize...')
             print('Will default to {}'.format(KEYS_mult_num[FIGSIZE]))
             self.opt_dict[FIGSIZE] = KEYS_mult_num[FIGSIZE]
+        
+        # Check that the string for limiting processing based on time
+        # is actually a valid date-time format.
+        if self.opt_dict[TIMETO] or self.opt_dict[TIMEFROM]:
+            self.opt_dict[DATETIME] = KEYS_str[DATETIME]
 
+            if self.opt_dict[TIMETO]:
+                self.opt_dict[TIMETO] = parse(self.opt_dict[TIMETO])
+                
+            if self.opt_dict[TIMEFROM]:
+                self.opt_dict[TIMEFROM] = parse(self.opt_dict[TIMEFROM])
+            
         return True
 
 

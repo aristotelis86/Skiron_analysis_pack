@@ -6,8 +6,9 @@ for the csv files provided by SKIRON.
 import numpy as np
 import csv
 import os
+from dateutil.parser import parse
 from task_reader import Task, VEC, SCAL, FILE, HISTO, SCATT, ROSE, HEAT, STATS, SERIES, SAVE, FTYPE, METEO
-from support_data import DIR, MAG, MEAN, MIN, MAX, MEDIAN, STD, PRCTILES, COV, RECORDS, ptiles, STAT_ID, DPI, FIGSIZE, TFONT, LFONT
+from support_data import DIR, MAG, MEAN, MIN, MAX, MEDIAN, STD, PRCTILES, COV, RECORDS, ptiles, STAT_ID, DPI, FIGSIZE, TFONT, LFONT, DATETIME, TIMEFROM, TIMETO
 import skiron_fig_lib as sflib
 
 def get_mag_dir(x, y, origin = False):
@@ -67,8 +68,18 @@ class SkironData:
             return
         
         # Read data to memory
-        temp_data = self.get_data_dict(vecHeads = self.vecHeads, scalHeads = self.scalHeads)
+        temp_data = self.get_data_dict(vecHeads = self.vecHeads, scalHeads = self.scalHeads, dateHead = self.task.opt_dict[DATETIME])
         
+        if not temp_data:
+            print('Empty dictionary returned by reader...')
+            print('Exiting Skiron data reader... <------')
+            return
+        
+        if self.validRecords == 0:
+            print('There were no valid records in the csv based on your choices...')
+            print('Exiting Skiron data reader... <------')
+            return
+
         # Organise data according to user input (headers)
         self.organise_data(temp_data)
 
@@ -92,7 +103,7 @@ class SkironData:
         print('')
         return
 
-    def get_data_dict(self, vecHeads = None, scalHeads = None):
+    def get_data_dict(self, vecHeads = None, scalHeads = None, dateHead = None):
         """
         Reads meteo data into dictionary
         (assumes SKIRON csv output format).
@@ -104,6 +115,9 @@ class SkironData:
                 nrow += 1
             
             self.totRecords = nrow
+            validHeaders = []
+            for name in csvData.fieldnames:
+                validHeaders.append(name)
 
         dd = {}
         # Concatenate heads...
@@ -123,17 +137,81 @@ class SkironData:
         with open(self.fname,'r') as csvfile:
             csvData = csv.DictReader(csvfile)
             
-            # Get the data
-            icount = 0
-            for row in csvData:
-                try:
-                    for name in myHeads:
-                        dd[name][icount] = float(row[name])
-                    icount += 1
-                except:
-                    print('Failed to convert to float.')
-                
-            self.validRecords = icount
+            # Get the data based on user instructions about date-time
+            if dateHead:
+                if dateHead in validHeaders:
+                    if self.task.opt_dict[TIMEFROM] and self.task.opt_dict[TIMETO]:
+                        tfrom = self.task.opt_dict[TIMEFROM]
+                        tto = self.task.opt_dict[TIMETO]
+
+                        icount = 0
+                        for row in csvData:
+                            dtime = parse(row[dateHead])
+                            if dtime >= tfrom and dtime <= tto:
+                                try:
+                                    for name in myHeads:
+                                        dd[name][icount] = float(row[name])
+                                    icount += 1
+                                except:
+                                    print('Failed to convert to float.')
+                        self.validRecords = icount
+
+                    elif self.task.opt_dict[TIMEFROM]:
+                        tfrom = self.task.opt_dict[TIMEFROM]
+
+                        icount = 0
+                        for row in csvData:
+                            dtime = parse(row[dateHead])
+                            if dtime >= tfrom:
+                                try:
+                                    for name in myHeads:
+                                        dd[name][icount] = float(row[name])
+                                    icount += 1
+                                except:
+                                    print('Failed to convert to float.')
+                        self.validRecords = icount
+
+                    elif self.task.opt_dict[TIMETO]:
+                        tto = self.task.opt_dict[TIMETO]
+
+                        icount = 0
+                        for row in csvData:
+                            dtime = parse(row[dateHead])
+                            if dtime <= tto:
+                                try:
+                                    for name in myHeads:
+                                        dd[name][icount] = float(row[name])
+                                    icount += 1
+                                except:
+                                    print('Failed to convert to float.')
+                        self.validRecords = icount
+
+                    else:
+                        icount = 0
+                        for row in csvData:
+                            try:
+                                for name in myHeads:
+                                    dd[name][icount] = float(row[name])
+                                icount += 1
+                            except:
+                                print('Failed to convert to float.')
+                        self.validRecords = icount
+
+                else:
+                    print('You requested date-time filtering but there is no header matching {}'.format(dateHead))
+                    return {}
+
+            else:
+                icount = 0
+                for row in csvData:
+                    try:
+                        for name in myHeads:
+                            dd[name][icount] = float(row[name])
+                        icount += 1
+                    except:
+                        print('Failed to convert to float.')
+                    
+                self.validRecords = icount
         return dd
 
     def organise_data(self, mydata):
@@ -381,7 +459,7 @@ class SkironData:
                     fileName.append(os.path.join(self.task.opt_dict[SAVE], 'rose_{}_{}.{}'.format(item[0], item[1], figtype)))
 
                 mtitle, mxlabel, mylabel, mlegend = sflib.get_fig_decorations_from_header(item, ROSE)
-                sflib.plot_roses(fileName, self.data[item][DIR], self.data[item][DIR], nsector = 16, bins = 10, title = mtitle, legtitle = mlegend, dpi = self.task.opt_dict[DPI], figsize = self.task.opt_dict[FIGSIZE])
+                sflib.plot_roses(fileName, self.data[item][DIR], self.data[item][MAG], nsector = 16, bins = 10, title = mtitle, legtitle = mlegend, dpi = self.task.opt_dict[DPI], figsize = self.task.opt_dict[FIGSIZE])
             
         print('Creating rose charts... OK')
         return 0
