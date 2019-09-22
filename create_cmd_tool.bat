@@ -1,3 +1,3 @@
 
-pyinstaller.exe -D -i icons\Compass.ico -n skyronanalysis mainApp.py
+pyinstaller.exe -D -i icons\Compass.ico -n skironanalysis mainApp.py
 pause
