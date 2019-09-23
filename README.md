@@ -55,18 +55,18 @@ The application is compatible with Python 3 (built with 3.7.3). The libraries lo
 - matplotlib
 - windrose
 
-#### Examples
-Example 1:
+## Examples
+#### Example 1:
 Process data using the task file ~/mytask.conf. Requesting as much information as possible and timing of the run:
 
 `python3 mainApp.py -v -t ~/mytask.conf`
 
-Example 2:
+#### Example 2:
 Process multiple data using the task files ~/mytask1.conf and ~/Document/tasks/task2.conf. Requesting as much information as possible:
 
 `python3 mainApp.py -v ~/mytas1k.conf ~/Document/tasks/task2.conf`
 
-Example 3:
+#### Example 3:
 Ask for help on the usage:
 
 `python3 mainApp.py -h`
