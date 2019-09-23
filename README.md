@@ -13,11 +13,26 @@ It is able to produce basic statistical indexes such as:
 - *Number of valid records*
 
 Additionally, multiple figures can be created:
-- *Timeseries*
+- *Timeseries* 
+<p align="center">
+  <img src="example_out/timeseries_p_m1ll.png" width="350" title="timeseries">
+</p>
 - *Histograms*
+<p align="center">
+  <img src="example_out/histogram_u_m1ll_v_m1ll_mag.png" width="350" title="histogram">
+</p>
 - *Scatter plots* (2D only)
+<p align="center">
+  <img src="example_out/scatter_u_m3ll_v_m3ll.png" width="350" title="scatter">
+</p>
 - *Heatmaps* (2D only, polar coord displayed)
+<p align="center">
+  <img src="example_out/heatmap_u_m3ll_v_m3ll.png" width="350" title="heatmap">
+</p>
 - *Rose charts* (2D only, polar coord displayed)
+<p align="center">
+  <img src="example_out/rose_u_m3ll_v_m3ll.png" width="350" title="rose">
+</p>
 
 ## Usage
 The main script (`mainApp.py`) expects at least one text file summarising the task to be completed. If multiple tasks are needed, then multiple task files can be passed to the script. The task file is plain text, and uses the (`field = value(s)`) convention. An example task file is given as *example.conf*. The extension of the file can be arbitrary (not checked for validation).
