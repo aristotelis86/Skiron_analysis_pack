@@ -1,9 +1,10 @@
 from task_reader import Task
 from skiron_reader import SkironData
 import sys
+from datetime import datetime
 
 #############################################################
-def main(verbose = True):
+def main(verbose = False):
     """
     Master controller of the application.
     (For command line at least...)
@@ -14,18 +15,19 @@ def main(verbose = True):
     nargs = len(myargs)
     actedon = 0
     dry = False
+    timeit = False
 
     # If we do have arguments...
     if nargs > 0:
         for arg in myargs:
             # Check if the user explicitly asked for verbosity
             if arg[0] == '-':
-                if arg.lower() == '-v1':
+                if arg.lower() == '-v':
                     verbose = True
-                elif arg.lower() == '-v0':
-                    verbose = False
                 elif arg.lower() == '-dry':
                     dry = True
+                elif arg.lower() == '-t':
+                    timeit = True
                 elif arg.lower() == '-h':
                     display_help()
                     if nargs > 1:
@@ -41,9 +43,15 @@ def main(verbose = True):
         # Show banner
         welcome_message()
 
+        # Start timer for reporting if necessary
+        startTime = datetime.now()
+        intervTime = startTime
+        taskID = 0
+
         # Previous loop was to check for verbosity, now take action
         for arg in myargs:
             if arg[0] != '-':
+                taskID += 1
                 temp_task = Task(arg)
                 if not temp_task.ok:
                     print('Task was not read correctly --> {}'.format(arg))
@@ -52,11 +60,17 @@ def main(verbose = True):
                 if verbose or dry:
                     temp_task.dump()
 
+                # Get time to load task
+                timenow = datetime.now()
+                if timeit:
+                    print('****Task {} loaded in {} (hh:mm:ss).****'.format(taskID, timenow - intervTime))
+
                 if dry:
-                    print('Finished dry run.')
-                    print('No action taken.')
-                    return
+                    print('Finished dry run for Task {}.'.format(taskID))
+                    continue
                 
+                # Measure action
+                intervTime = datetime.now()
                 temp_skiron = SkironData(temp_task)
                 if not temp_skiron.ok:
                     print('Task could not load data correctly --> {}'.format(arg))
@@ -64,7 +78,13 @@ def main(verbose = True):
                     continue
                 if verbose:
                     temp_skiron.dump_summary()
+
+                timenow = datetime.now()
+                if timeit:
+                    print('****Data for task {} loaded in {} (hh:mm:ss).****'.format(taskID, timenow - intervTime))
                 
+                # Measure output timing
+                intervTime = datetime.now()
                 plots_ok = temp_skiron.create_plots()
                 if not plots_ok:
                     print('Some or all of the plots were created...')
@@ -75,6 +95,10 @@ def main(verbose = True):
                 elif stats_ok > 0:
                     print('Statistics were not asked, so skipping...')
 
+                timenow = datetime.now()
+                if timeit:
+                    print('****Output for task {} created in {} (hh:mm:ss).****'.format(taskID, timenow - intervTime))
+                
                 actedon += 1
     else:
         # Lack of arguments => exit...
@@ -86,6 +110,10 @@ def main(verbose = True):
         print('{} Task(s) were performed.'.format(actedon))
     else:
         print('No action taken.')
+
+    timenow = datetime.now()
+    if timeit:
+        print('****The app finished in {} (hh:mm:ss).****'.format(timenow - startTime))
 
     print('Inspect previous messages for any errors/tasks undone...')
     return
@@ -102,8 +130,15 @@ def display_help():
     print('SKIRONANALYSIS Application:')
     print('Get basic statistics and figures for data in a SKIRON csv output file.')
     print('Usage:')
-    print('skironanalysis batch.conf [batch2.conf ...] [-v0, -v1, -h, -dry]')
-
+    print('skironanalysis batch.conf [batch2.conf ...] [-v, -t, -h, -dry]')
+    print('')
+    print('                -h:         Show this help message.                    ')
+    print('                -v:         Turn on verbose mode. Multiple messages are')
+    print('                            shown to the user.                         ')
+    print('                -t:         Shows timings of each task/action.         ')
+    print('              -dry:         Attempts to load the task(s). No further   ')
+    print('                            action is taken (ie load/process data.)    ')
+    
 ###############################################################
 # Actual run part
 if __name__ == "__main__":

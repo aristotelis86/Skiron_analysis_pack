@@ -5,19 +5,21 @@ or variables commonly used.
 
 # Variables to be used primarily
 # by the SKIRON data reader.
-DIR = 'dir'
-MAG = 'mag'
+DIR = 'dir'             # To be used by dictionaries with vector's representation in polar coord
+MAG = 'mag'             # To be used by dictionaries with vector's representation in polar coord
 
-MEAN = 'mean'
-MIN = 'min'
-MAX = 'max'
-MEDIAN = 'median'
-STD = 'std'
-PRCTILES = 'prctiles'
-COV = 'covariance'
-RECORDS = 'records'
+MEAN = 'mean'           # stat index
+MIN = 'min'             # stat index
+MAX = 'max'             # stat index
+MEDIAN = 'median'       # stat index
+STD = 'std'             # stat index
+PRCTILES = 'prctiles'   # stat index
+COV = 'covariance'      # stat index
+RECORDS = 'records'     # stat index
 
+# Prescribed percentiles to be created
 ptiles = [10, 20, 40, 60, 80, 90]
+# Gather the previous identifiers
 STAT_ID = [MEAN, MIN, MAX, MEDIAN, STD, COV, PRCTILES, RECORDS]
 
 # Variables to be used primarily by the Task reader.
@@ -49,7 +51,8 @@ LFONT = 'labelfont'     # numeric (int)
 NOKEY = 'nokey'         # Not expected in the conf file, just as a no-key flag for the rest of the code
 NOKEY_val = ''
 
-# List the keys above
+# List the keys above (grouping based on accepted values) 
+# Showing default values for ease of use
 KEYS_str = {
     FILE: '',
     SAVE: '',
@@ -85,14 +88,18 @@ KEYS_mult_num = {
     FIGSIZE: (10, 10)
 }
 
+# For boolean variables, what should be considered positive (case insensitive)
 POS_ANS = ['1', 't', 'y', 'yes', 'true']
+# Image file types accepted
 FTYPES_ALLOWED = ['png', 'eps', 'pdf', 'ps', 'svg']
 
+###########################################################################################################
 # This section defines the dictionaries
 # to help when annotating the figures.
+# It could be made external (ie read by file per user request/input to override default)
 description_dict = {
-    MAG: 'Wind speed',
-    DIR: 'Wind direction',
+    MAG: 'Wind speed',                      # For vectors
+    DIR: 'Wind direction',                  # For vectors
     'u': 'Wind (x-comp)',
     'v': 'Wind (y-comp)',
     'aird': 'Air density',
@@ -122,6 +129,7 @@ level_dict = {
     'm5ll': '160 m'
 }
 
+# To be used in decorating figures
 graph_types = {
     SCATT: 'Components',
     HISTO: 'Histogram',
