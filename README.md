@@ -41,7 +41,7 @@ The general format of this text file follows the (`field = value(s)`) convention
 - **save**: provides the path to the folder to save all the output (both figures and statistics). The path should be relative to the task file, similarly to the **file** field. The default value is empty and the path should not contain empty spaces. Only one entry of this field is allowed. If the folder does not exist, it will be created, along with any parent folders needed. 
 - **ftype**: passes the image file types to be used for saving the figures. More than one entries can be entered (comma-separated). Default value is *png*, but it also accepts any combination of *eps*, *pdf*, *ps* and *svg*.
 
-When attempting to load one or more task files, the application will try to recover from certain failures. If it fails to recover, any remaining tasks will continue normally. Emtpy lines and entries not recognised are ignored by default and do not affect the run.
+When attempting to load one or more task files, the application will try to recover from certain failures. If it fails to recover, any remaining tasks will continue normally. Emtpy lines and entries not recognised are ignored by default and do not affect the run. You may or may not leave space around the `=` sign between the field and its value.
 
 ## Dependencies
 The application is compatible with Python 3 (built with 3.7.3). The libraries loaded are the following:
